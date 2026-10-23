@@ -26,8 +26,12 @@ StyledRect {
     readonly property int bodyPreviewTextFormat: bodyHasMarkup ? Text.PlainText : bodyTextFormat
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? Tokens.spacing.extraSmall * 2 + appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
     property bool expanded: Config.notifs.openExpanded
+    property bool hovered: false
+    property real glassMorph: 0
+    property real hoverMorph: 0
+    property real glassRadius: Tokens.rounding.large
 
-    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
+    color: "transparent"
     radius: Tokens.rounding.large
 
     implicitHeight: inner.implicitHeight
@@ -36,13 +40,69 @@ StyledRect {
     Component.onCompleted: {
         x = 0;
         modelData.lock(this);
+        updateGlassRadius();
+        glassMorph = 1;
+        glassSettle.start();
     }
     Component.onDestruction: modelData.unlock(this)
+
+    onExpandedChanged: {
+        updateGlassRadius();
+        if (expanded) {
+            glassMorph = 1;
+            glassSettle.restart();
+        }
+    }
+
+    onHoveredChanged: updateGlassRadius()
+
+    function updateGlassRadius(): void {
+        glassRadius = expanded ? radius * 1.55 : hovered ? radius * 1.25 : radius;
+    }
 
     Behavior on x {
         Anim {
             easing: Tokens.anim.emphasizedDecel
         }
+    }
+
+    Behavior on hoverMorph {
+        Anim {
+            type: Anim.DefaultEffects
+        }
+    }
+
+    Behavior on glassRadius {
+        Anim {
+            type: Anim.SlowEffects
+        }
+    }
+
+    NumberAnimation {
+        id: glassSettle
+
+        target: root
+        property: "glassMorph"
+        to: 0
+        duration: 1100
+        easing.type: Easing.OutElastic
+        easing.amplitude: 0.45
+        easing.period: 0.6
+    }
+
+    LiquidGlass {
+        anchors.fill: parent
+        radius: root.glassRadius + root.glassMorph * 4
+        morph: Math.max(root.glassMorph, root.hoverMorph)
+        tint: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceBright
+        tintStrength: 0.2
+        glassOpacity: 0.84
+        chroma: 1
+        refraction: 0.1
+        bevelDepth: 0.22
+        bevelWidth: 0.14
+        specularIntensity: 1.6
+        frost: 1.4
     }
 
     MouseArea {
@@ -54,8 +114,14 @@ StyledRect {
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
         preventStealing: true
 
-        onEntered: root.modelData.timer.stop()
+        onEntered: {
+            root.modelData.timer.stop();
+            root.hovered = true;
+            root.hoverMorph = 0.8;
+        }
         onExited: {
+            root.hovered = false;
+            root.hoverMorph = 0;
             if (!pressed)
                 root.modelData.timer.start();
         }

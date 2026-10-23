@@ -200,7 +200,7 @@ Item {
             anchors.topMargin: wrapper.idx === 0 ? 0 : Tokens.spacing.medium
 
             color: "transparent"
-            radius: notif.radius
+            radius: notif.glassRadius + 8
             implicitWidth: notif.implicitWidth
             implicitHeight: notif.implicitHeight
 
