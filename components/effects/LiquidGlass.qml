@@ -49,6 +49,8 @@ Item {
         anchors.fill: parent
         clip: true
 
+        // A layer surface cannot sample the compositor's backdrop directly, so
+        // the glass refracts the current wallpaper at the card's screen position.
         CachingImage {
             id: wallpaperImage
 

@@ -30,6 +30,11 @@ float sdRoundBox(vec2 p, vec2 b, float r) {
 }
 
 void main() {
+    if (resolution.x < 1.0 || resolution.y < 1.0) {
+        fragColor = vec4(0.0);
+        return;
+    }
+
     vec2 pixel = qt_TexCoord0 * resolution;
     vec2 halfSize = 0.5 * resolution;
     vec2 p = pixel - halfSize;
