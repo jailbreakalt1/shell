@@ -310,21 +310,27 @@ StyledRect {
 
         required property NotifData modelData
 
-        Layout.fillWidth: true
-        textFormat: Text.MarkdownText
-        text: {
-            const summary = modelData.summary.replace(/\n/g, " ");
-            const body = modelData.body.replace(/\n/g, " ");
-            const colour = root.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline;
+        readonly property string summaryText: modelData.summary.replace(/\n/g, " ")
+        readonly property string bodyText: Strings.notificationPreview(modelData.body).replace(/\n/g, " ")
 
-            if (metrics.text === metrics.elidedText)
-                return `${summary} <span style='color:${colour}'>${body}</span>`;
+        Layout.fillWidth: true
+        textFormat: Text.RichText
+        text: {
+            const colour = root.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline;
+            const summary = Strings.escapeHtml(summaryText);
+
+            if (metrics.text === metrics.elidedText) {
+                if (!bodyText)
+                    return summary;
+                return `${summary} <span style='color:${colour}'>${Strings.escapeHtml(bodyText)}</span>`;
+            }
 
             const t = metrics.elidedText.length - 3;
-            if (t < summary.length)
-                return `${summary.slice(0, t)}...`;
+            if (t < summaryText.length)
+                return `${Strings.escapeHtml(summaryText.slice(0, t))}...`;
 
-            return `${summary} <span style='color:${colour}'>${body.slice(0, t - summary.length)}...</span>`;
+            const bodyPart = bodyText.slice(0, Math.max(0, t - summaryText.length));
+            return `${summary} <span style='color:${colour}'>${Strings.escapeHtml(bodyPart)}...</span>`;
         }
         color: root.urgency === "critical" ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
 
@@ -334,7 +340,7 @@ StyledRect {
         TextMetrics {
             id: metrics
 
-            text: `${notifLine.modelData.summary} ${notifLine.modelData.body}`.replace(/\n/g, " ")
+            text: `${notifLine.summaryText} ${notifLine.bodyText}`
             font: notifLine.font
             elideWidth: notifLine.width
             elide: Text.ElideRight
