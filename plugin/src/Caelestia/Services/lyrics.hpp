@@ -76,6 +76,7 @@ private:
     void clearLines();
     void appendCandidates(const QList<LyricCandidate>& add);
     void clearCandidates();
+    void markSelected(LyricsBackend backend, const QString& id);
 
     void scheduleLoad();
     void doLoad();
@@ -84,14 +85,23 @@ private:
 
     void tryLocal(int reqId);
     void tryLrclib(int reqId);
+    void tryLrclibSearch(int reqId, bool usePrimaryArtist = false);
     void tryNetEase(int reqId);
+    void tryKugou(int reqId);
+    void tryQQMusic(int reqId);
     void chainNext(LyricsBackend justFailed, int reqId);
 
     void searchLrclibCandidates(int reqId);
     void searchNetEaseCandidates(int reqId);
+    void searchKugouCandidates(int reqId);
+    void searchQQMusicCandidates(int reqId);
 
-    void fetchLrclibById(const QString& id, int reqId);
-    void fetchNetEaseLyricsById(const QString& id, int reqId);
+    void fetchLrclibById(const QString& id, int reqId, bool chainOnFailure = false);
+    void fetchNetEaseLyricsById(const QString& id, int reqId, bool chainOnFailure = false);
+    void fetchKugouLyricsById(const QString& id, int reqId, bool chainOnFailure = false);
+    void fetchQQMusicLyricsById(const QString& id, int reqId, bool chainOnFailure = false);
+
+    [[nodiscard]] qreal scoreFor(const LyricCandidate& candidate) const;
 
     QNetworkReply* getJson(const QUrl& url, const QHash<QByteArray, QByteArray>& headers = {});
     void trackReply(int reqId, QNetworkReply* reply);
@@ -115,8 +125,6 @@ private:
     static void writeCachedLrc(LyricsBackend backend, const QString& id, const QString& text);
 
     [[nodiscard]] static QVector<LyricLine> parseLrc(const QString& text);
-    [[nodiscard]] static QString tryReadLocalLrc(const QString& dir, const QString& artist, const QString& title);
-    [[nodiscard]] static QString findLocalLrcRecursive(const QString& dir, const QString& artist, const QString& title);
 
     QNetworkAccessManager* m_nam;
     QTimer* m_loadDebounce;
