@@ -33,8 +33,8 @@ Row {
 
     property color colour: type == SplitButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
     property color textColour: type == SplitButton.Filled ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
-    property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
-    property color disabledTextColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
+    property color disabledColour: Qt.alpha(Colours.disabledRed, 0.16)
+    property color disabledTextColour: Colours.disabledRed
 
     spacing: Math.floor(Tokens.spacing.extraSmall / 2)
 

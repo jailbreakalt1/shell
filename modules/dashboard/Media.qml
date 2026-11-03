@@ -17,6 +17,7 @@ Item {
 
     BackgroundShapes {
         anchors.fill: parent
+        accentColour: coverVisualiser.mediaColour
     }
 
     RowLayout {
@@ -25,6 +26,8 @@ Item {
         spacing: Tokens.spacing.extraLarge
 
         CoverVisualiser {
+            id: coverVisualiser
+
             Layout.fillHeight: true
             implicitWidth: Tokens.sizes.dashboard.mediaSectionWidth
         }
@@ -95,7 +98,7 @@ Item {
                         Layout.topMargin: (pathBounds().height - implicitSize) / 2
                         Layout.bottomMargin: (pathBounds().height - implicitSize) / 2 + Tokens.spacing.small
                         Layout.alignment: Qt.AlignHCenter
-                        color: Colours.palette.m3primaryContainer
+                        color: Qt.alpha(Colours.enabledGreenMuted, 0.16)
                         implicitSize: icon.implicitHeight + Tokens.padding.extraLarge * 2
                         shape: MaterialShape.ClamShell
 
@@ -109,7 +112,7 @@ Item {
                             anchors.centerIn: parent
                             text: "queue_music"
                             fontStyle: Tokens.font.icon.builders.large.scale(2).build()
-                            color: Colours.palette.m3onPrimaryContainer
+                            color: Colours.enabledGreen
                         }
                     }
 
@@ -144,6 +147,7 @@ Item {
                     LyricsAndSelector {
                         Layout.fillHeight: true
                         implicitWidth: Tokens.sizes.dashboard.mediaSectionWidth
+                        accentColour: coverVisualiser.mediaColour
                     }
                 }
             }

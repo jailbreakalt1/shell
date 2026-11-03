@@ -21,8 +21,8 @@ BusyIndicator {
 
     property real implicitSize: Tokens.font.body.medium.pointSize * 3
     property real strokeWidth: Tokens.padding.extraSmall
-    property color fgColour: Colours.palette.m3primary
-    property color bgColour: Colours.palette.m3secondaryContainer
+    property color fgColour: enabled ? Colours.enabledGreen : Colours.disabledRed
+    property color bgColour: enabled ? Qt.alpha(Colours.enabledGreenMuted, 0.25) : Qt.alpha(Colours.disabledRed, 0.18)
 
     property alias type: manager.indeterminateAnimationType
     readonly property alias progress: manager.progress

@@ -99,7 +99,7 @@ TextFieldBase {
             renderType: Text.QtRendering
 
             text: root.placeholderText
-            color: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor)
+            color: !root.enabled ? Colours.disabledRed : root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor)
 
             states: [
                 State {
@@ -184,7 +184,7 @@ TextFieldBase {
 
         sourceComponent: StyledText {
             text: root.effectiveSupportingText
-            color: root.isError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+            color: !root.enabled ? Colours.disabledRed : root.isError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
             font: Tokens.font.label.small
         }
     }
@@ -210,7 +210,7 @@ TextFieldBase {
                 readonly property real inset: strokeWidth / 2
 
                 strokeWidth: root.activeFocus ? 2 : 1
-                strokeColor: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
+                strokeColor: !root.enabled ? Colours.disabledRed : root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
                 fillColor: "transparent"
                 capStyle: ShapePath.RoundCap
 
@@ -289,7 +289,7 @@ TextFieldBase {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 implicitHeight: root.activeFocus ? 2 : 1
-                color: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
+                color: !root.enabled ? Colours.disabledRed : root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
 
                 Behavior on implicitHeight {
                     Anim {}

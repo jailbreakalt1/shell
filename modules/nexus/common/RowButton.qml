@@ -39,16 +39,11 @@ ConnectedRect {
         anchors.margins: Tokens.padding.largeIncreased
 
         spacing: Tokens.spacing.medium
-        opacity: root.disabled ? 0.5 : 1
-
-        Behavior on opacity {
-            Anim {}
-        }
 
         MaterialIcon {
             id: iconLabel
 
-            color: Colours.palette.m3onSurfaceVariant
+            color: root.disabled ? Colours.disabledRed : Colours.palette.m3onSurfaceVariant
             fontStyle: Tokens.font.icon.medium
             fill: 1
         }
@@ -65,6 +60,7 @@ ConnectedRect {
                 anchors.left: parent.left
                 anchors.right: parent.right
 
+                color: root.disabled ? Colours.disabledRed : Colours.palette.m3onSurface
                 font: Tokens.font.body.small
                 elide: Text.ElideRight
             }
@@ -76,7 +72,7 @@ ConnectedRect {
                 anchors.right: parent.right
 
                 visible: text
-                color: Colours.palette.m3outline
+                color: root.disabled ? Colours.disabledRed : Colours.palette.m3outline
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
             }
@@ -89,7 +85,7 @@ ConnectedRect {
 
             sourceComponent: MaterialIcon {
                 text: root.trailingIcon
-                color: Colours.palette.m3onSurfaceVariant
+                color: root.disabled ? Colours.disabledRed : Colours.palette.m3onSurfaceVariant
                 fontStyle: Tokens.font.icon.medium
             }
         }

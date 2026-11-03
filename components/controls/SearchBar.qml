@@ -65,7 +65,7 @@ TextFieldBase {
         anchors.leftMargin: Tokens.padding.large
 
         text: "search"
-        color: Colours.palette.m3onSurfaceVariant
+        color: root.enabled ? Colours.palette.m3onSurfaceVariant : Colours.disabledRed
         fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
     }
 

@@ -16,8 +16,8 @@ Item {
     property int strokeWidth: Tokens.padding.small
     property int padding: 0
     property int spacing: Tokens.spacing.small
-    property color fgColour: Colours.palette.m3primary
-    property color bgColour: Colours.palette.m3secondaryContainer
+    property color fgColour: enabled ? Colours.enabledGreen : Colours.disabledRed
+    property color bgColour: enabled ? Qt.alpha(Colours.enabledGreenMuted, 0.25) : Qt.alpha(Colours.disabledRed, 0.18)
     property alias hasEndIndicator: dot.active
 
     property bool wavy: false

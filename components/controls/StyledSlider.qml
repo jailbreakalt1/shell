@@ -19,8 +19,8 @@ Slider {
     property bool interactionOnMove: true
     readonly property bool dragging: mouse.pressed
 
-    property color fgColour: enabled ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3onSurface, 0.38)
-    property color bgColour: enabled ? Colours.palette.m3secondaryContainer : Qt.alpha(Colours.palette.m3onSurface, 0.1)
+    property color fgColour: enabled ? Colours.enabledGreen : Colours.disabledRed
+    property color bgColour: enabled ? Qt.alpha(Colours.enabledGreenMuted, 0.3) : Qt.alpha(Colours.disabledRed, 0.2)
 
     property real pos: visualPosition
     property real filledWidth

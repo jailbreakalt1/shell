@@ -65,7 +65,7 @@ DoubleSpinBox {
         bottomRightRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
 
         icon: "remove"
-        disabledColour: Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0.4)
+        disabledColour: Qt.alpha(Colours.disabledRed, 0.16)
         color: disabled ? disabledColour : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
         type: IconButton.Text
         padding: Tokens.padding.extraSmall
@@ -101,7 +101,7 @@ DoubleSpinBox {
         bottomLeftRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
 
         icon: "add"
-        disabledColour: Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0.4)
+        disabledColour: Qt.alpha(Colours.disabledRed, 0.16)
         color: disabled ? disabledColour : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
         type: IconButton.Text
         padding: Tokens.padding.extraSmall

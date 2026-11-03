@@ -25,7 +25,7 @@ Slider {
             y: root.handle.y
             implicitHeight: parent.height - y
 
-            color: Colours.palette.m3secondary
+            color: root.enabled ? Colours.enabledGreen : Colours.disabledRed
             radius: parent.radius
         }
     }
@@ -50,7 +50,7 @@ Slider {
 
             anchors.fill: parent
 
-            color: Colours.palette.m3inverseSurface
+            color: root.enabled ? Colours.palette.m3inverseSurface : Qt.alpha(Colours.disabledRed, 0.16)
             radius: Tokens.rounding.full
 
             MouseArea {
@@ -70,7 +70,7 @@ Slider {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: 1
                 text: moving ? Math.round(root.value * 100) : root.icon
-                color: Colours.palette.m3inverseOnSurface
+                color: root.enabled ? Colours.palette.m3inverseOnSurface : Colours.disabledRed
                 font: moving ? Tokens.font.body.small : Tokens.font.icon.medium
 
                 Behavior on moving {

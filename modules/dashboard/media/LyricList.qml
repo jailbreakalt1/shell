@@ -15,6 +15,8 @@ import qs.services
 Item {
     id: root
 
+    property color accentColour: Colours.mediaNeutral
+
     // Funny binding hack to make lyrics update
     readonly property var _: {
         const p = Players.active;
@@ -176,7 +178,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 implicitWidth: shape.implicitSize + Tokens.padding.medium * 2
                 implicitHeight: shape.implicitSize + Tokens.padding.medium * 2
-                color: Colours.palette.m3primaryContainer
+                color: Qt.alpha(Colours.enabledGreenMuted, 0.12)
                 radius: Tokens.rounding.full
 
                 LoadingIndicator {
@@ -269,14 +271,14 @@ Item {
             anchors.right: lyrics.contentItem.right
 
             text: modelData || ". . ."
-            color: ListView.isCurrentItem ? Colours.palette.m3primary : mouse.containsMouse ? Colours.palette.m3onSurface : Colours.palette.m3outline
+            color: ListView.isCurrentItem ? root.accentColour : mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.85) : Qt.rgba(1, 1, 1, 0.45)
             font: Tokens.font.body.medium
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
             layer.enabled: effectScale > 0
             layer.effect: MultiEffect {
                 shadowEnabled: true
-                shadowColor: Colours.palette.m3primary
+                shadowColor: root.accentColour
                 shadowOpacity: 0.5 * lyric.effectScale
                 shadowBlur: 0.6 * lyric.effectScale
                 blur: 0.4 * lyric.effectScale

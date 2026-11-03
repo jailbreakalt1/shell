@@ -9,6 +9,10 @@ import qs.components.controls
 import qs.services
 
 Item {
+    id: root
+
+    property color accentColour: Colours.mediaNeutral
+
     ColumnLayout {
         id: layout
 
@@ -24,6 +28,7 @@ Item {
             MaterialIcon {
                 Layout.topMargin: Math.round(fontInfo.pointSize * 0.12)
                 text: "lyrics"
+                color: root.accentColour
                 fontStyle: Tokens.font.icon.medium
             }
 
@@ -39,6 +44,7 @@ Item {
         LyricList {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            accentColour: root.accentColour
         }
 
         SplitButton {

@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Effects
 import M3Shapes
 import Caelestia.Config
+import Caelestia.Images
 import qs.components
 import qs.components.controls
 import qs.components.effects
@@ -14,6 +15,10 @@ Item {
     id: root
 
     readonly property alias shape: shape
+    readonly property alias dominantColour: analyser.dominantColour
+    readonly property color mediaColour: image.status === Image.Ready
+        ? Colours.mediaAccent(analyser.dominantColour)
+        : Colours.mediaNeutral
 
     property bool hadPrevious
     property color fallbackColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
@@ -82,7 +87,7 @@ Item {
 
         sourceComponent: LoadingIndicator {
             implicitSize: root.width * 0.3
-            color: Colours.palette.m3primaryContainer
+            color: Colours.enabledGreen
         }
 
         Behavior on opacity {
@@ -103,5 +108,31 @@ Item {
         layer.effect: Mask {
             maskSource: shapeWrapper
         }
+    }
+
+    ImageAnalyser {
+        id: analyser
+
+        sourceItem: image
+        rescaleSize: 64
+    }
+
+    Connections {
+        target: image
+
+        function onStatusChanged(): void {
+            if (image.status === Image.Ready)
+                analyser.requestUpdate();
+        }
+
+        function onOpacityChanged(): void {
+            if (image.opacity >= 1)
+                analyser.requestUpdate();
+        }
+    }
+
+    Component.onCompleted: {
+        if (image.status === Image.Ready)
+            analyser.requestUpdate();
     }
 }

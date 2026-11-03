@@ -17,6 +17,9 @@ Item {
     property real maxSpeed: 18
     property real minRotSpeed: -12
     property real maxRotSpeed: 12
+    property real minMotionScale: 0.25
+    property real maxMotionScale: 2
+    property color accentColour: Colours.mediaNeutral
     property list<real> lightOpacities: [0.34, 0.34, 0.08, 0.2]
     property list<real> darkOpacities: [0.16, 0.16, 0.04, 0.16]
 
@@ -41,14 +44,30 @@ Item {
         running: root.visible && root.width > 0 && root.height > 0 && (Players.active?.isPlaying ?? false)
         onTriggered: {
             const dt = frameTime;
+            const values = Audio.cava.values;
+            const barCount = values?.length ?? 0;
+            let level = 0;
+
+            if (barCount > 0) {
+                for (let i = 0; i < barCount; i++)
+                    level += values[i];
+                level /= barCount;
+            }
+
             for (let i = 0; i < shapes.count; i++) {
                 const s = shapes.itemAt(i) as DriftingShape;
                 if (!s)
                     continue;
 
-                s.x += s.vx * dt;
-                s.y += s.vy * dt;
-                s.rotation += s.vr * dt;
+                const bar = barCount > 0 ? Math.max(0, Math.min(1, values[i % barCount])) : 0;
+                const energy = Math.max(0, Math.min(1, level * 0.4 + bar * 0.6));
+                const smooth = Math.min(1, dt * 10);
+                s.energy += (energy - s.energy) * smooth;
+
+                const motion = root.minMotionScale + s.energy * (root.maxMotionScale - root.minMotionScale);
+                s.x += s.vx * dt * motion;
+                s.y += s.vy * dt * motion;
+                s.rotation += s.vr * dt * motion;
 
                 if (s.x + s.width < 0)
                     s.x = root.width;
@@ -71,11 +90,12 @@ Item {
         property real vx: root.signedRand(root.minSpeed, root.maxSpeed)
         property real vy: root.signedRand(root.minSpeed, root.maxSpeed)
         property real vr: root.rand(root.minRotSpeed, root.maxRotSpeed)
+        property real energy: 0
         readonly property int colourIdx: Math.floor(Math.random() * 4)
 
         implicitSize: root.minSize + (index / root.count) * (root.maxSize - root.minSize)
         shape: root.shapePool[Math.floor(Math.random() * root.shapePool.length)]
-        color: [Colours.palette.m3primaryContainer, Colours.palette.m3secondaryContainer, Colours.palette.m3tertiaryContainer, Colours.palette.m3outlineVariant][colourIdx]
+        color: [Qt.lighter(root.accentColour, 1.3), root.accentColour, Qt.lighter(root.accentColour, 1.65), Qt.darker(root.accentColour, 1.2)][colourIdx]
         opacity: Colours.light ? root.lightOpacities[colourIdx] : root.darkOpacities[colourIdx]
         rotation: root.rand(0, 360)
 

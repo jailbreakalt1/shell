@@ -20,8 +20,8 @@ Switch {
         radius: Tokens.rounding.full
         color: {
             if (root.disabled)
-                return root.checked ? Qt.alpha(Colours.palette.m3onSurface, 0.12) : Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0.38);
-            return root.checked ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer);
+                return Qt.alpha(Colours.disabledRed, 0.24);
+            return root.checked ? Colours.enabledGreen : Qt.alpha(Colours.enabledGreenMuted, 0.24);
         }
 
         implicitWidth: implicitHeight * 1.7
@@ -33,8 +33,8 @@ Switch {
             radius: Tokens.rounding.full
             color: {
                 if (root.disabled)
-                    return root.checked ? Colours.palette.m3surface : Qt.alpha(Colours.palette.m3onSurface, 0.12);
-                return root.checked ? Colours.palette.m3onPrimary : Colours.layer(Colours.palette.m3outline, root.cLayer + 1);
+                    return Colours.disabledRed;
+                return root.checked ? Colours.deepBlack : Colours.enabledGreen;
             }
 
             x: root.checked ? parent.implicitWidth - nonAnimWidth - Tokens.padding.extraSmall / 2 : Tokens.padding.extraSmall / 2
@@ -46,7 +46,7 @@ Switch {
                 anchors.fill: parent
                 radius: parent.radius
 
-                color: root.checked ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                color: root.disabled ? Colours.disabledRed : root.checked ? Colours.enabledGreen : Colours.enabledGreenMuted
                 opacity: root.pressed ? 0.1 : root.hovered ? 0.08 : 0
 
                 Behavior on opacity {
@@ -103,9 +103,7 @@ Switch {
                 ShapePath {
                     strokeWidth: root.Tokens.font.body.large.pointSize * 0.15
                     strokeColor: {
-                        if (root.disabled)
-                            return root.checked ? Colours.palette.m3outline : Colours.palette.m3surfaceContainer;
-                        return root.checked ? Colours.palette.m3primary : Colours.palette.m3surfaceContainerHighest;
+                        return root.disabled ? Colours.deepBlack : root.checked ? Colours.enabledGreen : Colours.deepBlack;
                     }
                     fillColor: "transparent"
                     capStyle: root.Tokens.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap

@@ -42,7 +42,7 @@ StyledWindow {
     readonly property real shadowOpacity: 0.7 * (1 - fsTransitionProg)
     readonly property real borderLayoutThickness: hasFullscreen ? 0 : contentItem.Config.border.thickness
 
-    property color surfaceColour: Colours.tPalette.m3surface
+    property color surfaceColour: Colours.deepBlack
 
     readonly property int dragMaskPadding: {
         if (focusGrab.active || panels.popouts.isDetached)

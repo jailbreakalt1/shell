@@ -10,8 +10,8 @@ TextField {
     implicitWidth: contentWidth + leftPadding + rightPadding
     implicitHeight: contentHeight + topPadding + bottomPadding
 
-    color: Colours.palette.m3onSurface
-    placeholderTextColor: Colours.palette.m3onSurfaceVariant // No anim cause placeholder is custom
+    color: enabled ? Colours.palette.m3onSurface : Colours.disabledRed
+    placeholderTextColor: enabled ? Colours.palette.m3onSurfaceVariant : Colours.disabledRed // No anim cause placeholder is custom
     selectionColor: Qt.alpha(Colours.palette.m3primary, 0.4)
     selectedTextColor: color
 

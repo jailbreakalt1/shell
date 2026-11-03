@@ -160,7 +160,7 @@ ColumnLayout {
         StateLayer {
             id: stateLayer
 
-            color: parent.onColor
+            color: parent.disabled ? Colours.disabledRed : parent.onColor
             onClicked: parent.clicked()
         }
 
@@ -170,7 +170,7 @@ ColumnLayout {
             anchors.centerIn: parent
 
             animate: true
-            color: parent.onColor
+            color: parent.disabled ? Colours.disabledRed : parent.onColor
             font: Tokens.font.body.medium
         }
     }

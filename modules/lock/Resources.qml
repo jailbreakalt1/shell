@@ -50,7 +50,7 @@ StyledRect {
             value: Strings.percentOne(Cpu.percentage)
             fillValue: Cpu.percentage
             colour: Colours.palette.m3primary
-            shapeColour: Colours.palette.m3primaryContainer
+            shapeColour: Qt.alpha(Colours.enabledGreenMuted, 0.22)
             fillColour: Qt.alpha(Colours.palette.m3secondary, 0.3)
             shape: MaterialShape.Pentagon
 
@@ -59,7 +59,7 @@ StyledRect {
                 y: cpu.mShape.pointAtAngle(45).y - implicitSize / 2
 
                 shape: Cpu.temperature > 90 ? MaterialShape.SoftBurst : MaterialShape.Circle
-                color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3secondaryContainer
+                color: Cpu.temperature > 90 ? Qt.alpha(Colours.disabledRed, 0.25) : Qt.alpha(Colours.enabledGreenMuted, 0.25)
                 implicitSize: {
                     const size = Math.round(tempLabel.implicitHeight * 2);
                     return size % 2 === 0 ? size : size + 1; // Ensure even size so center works properly
@@ -87,7 +87,7 @@ StyledRect {
             value: Strings.percentOne(Memory.percentage)
             fillValue: Memory.percentage
             colour: Colours.palette.m3tertiary
-            shapeColour: Colours.palette.m3onTertiary
+            shapeColour: Qt.alpha(Colours.enabledGreen, 0.18)
             fillColour: Qt.alpha(Colours.palette.m3tertiary, 0.3)
             shape: MaterialShape.Slanted
         }
@@ -97,7 +97,7 @@ StyledRect {
             value: Strings.percentOne(Storage.percentage)
             fillValue: Storage.percentage
             colour: Colours.palette.m3secondary
-            shapeColour: Colours.palette.m3secondaryContainer
+            shapeColour: Qt.alpha(Colours.enabledGreenMuted, 0.22)
             fillColour: Qt.alpha(Colours.palette.m3secondary, 0.4)
             shape: MaterialShape.Gem
         }
