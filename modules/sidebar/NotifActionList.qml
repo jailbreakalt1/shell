@@ -8,6 +8,7 @@ import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.effects
+import qs.components.images
 import qs.services
 
 Item {
@@ -170,9 +171,12 @@ Item {
                     Component {
                         id: iconComp
 
-                        IconImage {
-                            asynchronous: true
-                            source: Quickshell.iconPath(action.modelData.identifier)
+                        SmartIcon {
+                            implicitSize: Math.round(Tokens.font.icon.small.pointSize * 1.25)
+                            icon: action.modelData.identifier
+                            fallbackIcon: "touch_app"
+                            iconColour: Colours.palette.m3onSurfaceVariant
+                            showFallbackBackground: false
                         }
                     }
 

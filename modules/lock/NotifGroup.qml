@@ -8,6 +8,7 @@ import Quickshell.Services.Notifications
 import Caelestia.Config
 import qs.components
 import qs.components.effects
+import qs.components.images
 import qs.services
 import qs.utils
 
@@ -70,28 +71,27 @@ StyledRect {
             Component {
                 id: imageComp
 
-                Image {
-                    source: Qt.resolvedUrl(root.image)
-                    fillMode: Image.PreserveAspectCrop
-                    sourceSize: {
-                        const size = TokenConfig.sizes.notifs.image * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1);
-                        return Qt.size(size, size);
-                    }
-                    cache: false
-                    asynchronous: true
-                    width: TokenConfig.sizes.notifs.image
-                    height: TokenConfig.sizes.notifs.image
+                SmartIcon {
+                    implicitSize: TokenConfig.sizes.notifs.image
+                    icon: root.image
+                    fallbackIcon: "broken_image"
+                    fallbackContentColour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    fillModeCrop: true
+                    showFallbackBackground: false
                 }
             }
 
             Component {
                 id: appIconComp
 
-                ColouredIcon {
+                SmartIcon {
                     implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
-                    source: Quickshell.iconPath(root.appIcon)
-                    colour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                    layer.enabled: root.appIcon.endsWith("symbolic")
+                    icon: root.appIcon
+                    fallbackIcon: Icons.getNotifAppIcon(root.appIcon, root.modelData, root.notifs[0]?.summary, root.urgency)
+                    fallbackContentColour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    iconColour: fallbackContentColour
+                    colorise: root.appIcon.endsWith("-symbolic")
+                    showFallbackBackground: false
                 }
             }
 
@@ -130,12 +130,15 @@ StyledRect {
                     color: root.urgency === "critical" ? Colours.palette.m3error : root.urgency === "low" ? Colours.palette.m3surfaceContainerHighest : Colours.palette.m3secondaryContainer
                     radius: Tokens.rounding.full
 
-                    ColouredIcon {
+                    SmartIcon {
                         anchors.centerIn: parent
                         implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
-                        source: Quickshell.iconPath(root.appIcon)
-                        colour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                        layer.enabled: root.appIcon.endsWith("symbolic")
+                        icon: root.appIcon
+                        fallbackIcon: Icons.getNotifAppIcon(root.appIcon, root.modelData, root.notifs[0]?.summary, root.urgency)
+                        fallbackContentColour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                        iconColour: fallbackContentColour
+                        colorise: root.appIcon.endsWith("-symbolic")
+                        showFallbackBackground: false
                     }
                 }
             }

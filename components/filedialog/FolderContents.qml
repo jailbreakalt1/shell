@@ -188,17 +188,18 @@ Item {
             anchors.topMargin: Tokens.padding.medium
 
             implicitSize: Sizes.itemWidth - Tokens.padding.medium * 2
+            fallbackIcon: Icons.getFileFallbackIcon(item.modelData.mimeType, item.modelData.name, item.modelData.isDir)
 
             Component.onCompleted: {
                 const file = item.modelData;
                 if (file.isImage)
                     source = Qt.resolvedUrl(file.path);
                 else if (!file.isDir)
-                    source = Quickshell.iconPath(file.mimeType.replace("/", "-"), "application-x-zerosize");
+                    source = Icons.resolveIcon(file.mimeType.replace("/", "-"), "");
                 else if (root.dialog.cwd.length === 1 && ["Desktop", "Documents", "Downloads", "Music", "Pictures", "Public", "Templates", "Videos"].includes(file.name))
-                    source = Quickshell.iconPath(`folder-${file.name.toLowerCase()}`);
+                    source = Icons.resolveIcon(`folder-${file.name.toLowerCase()}`, "folder");
                 else
-                    source = Quickshell.iconPath("inode-directory");
+                    source = Icons.resolveIcon("inode-directory", "folder");
             }
         }
 

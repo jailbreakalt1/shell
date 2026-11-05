@@ -109,6 +109,78 @@ Singleton {
         [["profile"], "person"],
         [["file"], "folder_copy"]
     ]
+
+    readonly property var appIconRules: [
+        [["firefox", "chrome", "chromium", "brave", "browser", "webkit"], "public"],
+        [["code", "vscode", "codium", "ide"], "code"],
+        [["terminal", "kitty", "alacritty", "foot", "wezterm"], "terminal"],
+        [["spotify", "music", "player"], "music_note"],
+        [["discord", "telegram", "signal", "whatsapp", "chat"], "chat"],
+        [["steam", "game"], "sports_esports"],
+        [["gimp", "krita", "photo", "image"], "photo_library"],
+        [["vlc", "mpv", "video"], "movie"],
+        [["file", "nautilus", "dolphin", "thunar"], "files"],
+        [["settings", "control"], "settings"],
+        [["office", "libreoffice", "document"], "description"],
+        [["mail", "thunderbird"], "mail"],
+        [["calendar"], "calendar_month"],
+        [["clock"], "schedule"],
+        [["calculator"], "calculate"]
+    ]
+
+    readonly property var notifAppIconRules: [
+        [["audio-headset", "headset", "headphone"], "headphones"],
+        [["bluetooth", "blueman"], "bluetooth"],
+        [["media-record", "recording", "screenrecord"], "screen_record"],
+        [["screenshot", "spectacle"], "screenshot_monitor"],
+        [["firefox", "chrome", "chromium", "browser"], "public"],
+        [["instagram"], "photo_camera"],
+        [["discord"], "forum"],
+        [["telegram"], "send"],
+        [["steam"], "sports_esports"],
+        [["spotify"], "music_note"],
+        [["code", "vscode", "codium"], "code"],
+        [["terminal", "kitty", "alacritty"], "terminal"],
+        [["mail", "thunderbird"], "mail"],
+        [["calendar"], "calendar_month"]
+    ]
+
+    readonly property var menuIconRules: [
+        [["about"], "info"],
+        [["propert", "settings", "preferences", "config"], "settings"],
+        [["bluetooth"], "bluetooth"],
+        [["addon", "add-on", "extension", "plugin"], "extension"],
+        [["exit", "quit", "close"], "logout"],
+        [["copy"], "content_copy"],
+        [["paste"], "content_paste"],
+        [["reload", "refresh"], "refresh"],
+        [["fullscreen"], "fullscreen"],
+        [["mute", "volume"], "volume_up"],
+        [["hide"], "visibility_off"],
+        [["show"], "visibility"],
+        [["new window", "new"], "add"],
+        [["download"], "download"],
+        [["upload"], "upload"],
+        [["print"], "print"],
+        [["help"], "help"],
+        [["check", "update"], "update"]
+    ]
+
+    readonly property var trayIconRules: [
+        [["bluetooth", "blueman"], "bluetooth"],
+        [["network", "wifi", "ethernet"], "wifi"],
+        [["volume", "audio", "sound"], "volume_up"],
+        [["battery", "power"], "battery_full"],
+        [["chrome", "chromium", "browser", "firefox"], "public"],
+        [["discord"], "forum"],
+        [["telegram"], "send"],
+        [["steam"], "sports_esports"],
+        [["spotify"], "music_note"],
+        [["mail", "thunderbird"], "mail"],
+        [["dropbox", "nextcloud", "cloud"], "cloud"],
+        [["keyboard"], "keyboard"],
+        [["screen", "record"], "screen_record"]
+    ]
     // qmlformat on
 
     /**
@@ -140,11 +212,188 @@ Singleton {
         return "";
     }
 
+    function decodeIcon(value: string): string {
+        try {
+            return decodeURIComponent(value);
+        } catch (e) {
+            return value;
+        }
+    }
+
+    function isUrl(source: string): bool {
+        if (!source)
+            return false;
+
+        return source.startsWith("file://") || source.startsWith("image://") || source.startsWith("qrc:/") || source.startsWith("http://") || source.startsWith("https://") || source.startsWith("data:");
+    }
+
+    function isImageSource(source: string): bool {
+        if (!source)
+            return false;
+
+        if (isUrl(source))
+            return true;
+
+        if (source.startsWith("/") || source.startsWith("~/"))
+            return true;
+
+        return /\.(png|jpe?g|webp|svg|gif|avif|bmp|ico)(\?.*)?$/i.test(source);
+    }
+
+    function toImageSource(source: string): string {
+        if (!source)
+            return "";
+
+        if (source.startsWith("~"))
+            return Qt.resolvedUrl(`${Quickshell.env("HOME")}${source.slice(1)}`);
+
+        if (source.startsWith("/"))
+            return Qt.resolvedUrl(source);
+
+        return source;
+    }
+
+    /**
+     * Resolves a theme icon name or file path to a source that will actually
+     * load. Returns an empty string when nothing can be found, allowing the
+     * caller to display its own fallback instead of Quickshell's missing-icon
+     * texture.
+     */
+    function resolveIcon(source: string, fallback: string): string {
+        if (!source)
+            return fallback ? resolveIcon(fallback, "") : "";
+
+        if (source.startsWith("image://icon/"))
+            return resolveSource(source);
+
+        if (isImageSource(source))
+            return toImageSource(source);
+
+        const path = Quickshell.iconPath(source, true);
+        if (path)
+            return path;
+
+        if (fallback && fallback !== source)
+            return resolveIcon(fallback, "");
+
+        return "";
+    }
+
+    /**
+     * Resolves any icon source, including Quickshell image-provider URLs such
+     * as image://icon/name?fallback=other. Invalid provider URLs resolve to an
+     * empty string rather than the purple/black missing texture.
+     */
+    function resolveSource(source: string): string {
+        if (!source)
+            return "";
+
+        if (source.startsWith("image://icon/")) {
+            const raw = source.slice("image://icon/".length);
+            const pathIndex = raw.indexOf("?path=");
+            if (pathIndex !== -1) {
+                const name = raw.slice(0, pathIndex);
+                const dir = raw.slice(pathIndex + "?path=".length).replace(/^\/+/, "");
+                const file = name.slice(name.lastIndexOf("/") + 1);
+                const themed = Quickshell.iconPath(file, true);
+                return themed ? themed : toImageSource(dir ? `/${dir}/${file}` : `/${file}`);
+            }
+
+            const fallbackIndex = raw.indexOf("?fallback=");
+            if (fallbackIndex !== -1) {
+                const name = raw.slice(0, fallbackIndex);
+                const fallback = raw.slice(fallbackIndex + "?fallback=".length);
+                const resolved = resolveIcon(decodeIcon(name), "");
+                return resolved ? resolved : resolveIcon(decodeIcon(fallback), "");
+            }
+
+            return resolveIcon(decodeIcon(raw), "");
+        }
+
+        if (isImageSource(source))
+            return toImageSource(source);
+
+        return resolveIcon(source, "");
+    }
+
+    function getMonogram(text: string): string {
+        if (!text)
+            return "";
+
+        const cleaned = text.replace(/[^A-Za-z0-9\u00C0-\uFFFF ]/g, " ").trim();
+        if (!cleaned)
+            return "";
+
+        const parts = cleaned.split(/\s+/).filter(part => part.length > 0);
+        if (parts.length === 0)
+            return "";
+
+        if (parts.length === 1)
+            return parts[0].slice(0, 1).toUpperCase();
+
+        return `${parts[0].slice(0, 1)}${parts[1].slice(0, 1)}`.toUpperCase();
+    }
+
     function getAppIcon(name: string, fallback: string): string {
         const icon = DesktopEntries.heuristicLookup(name)?.icon;
-        if (fallback !== "undefined")
-            return Quickshell.iconPath(icon, fallback);
-        return Quickshell.iconPath(icon);
+        return resolveIcon(icon, fallback === "undefined" ? "" : fallback);
+    }
+
+    function getAppFallbackIcon(name: string, categories: var, icon: string): string {
+        const match = matchIcon(`${name} ${icon}`.toLowerCase(), appIconRules, "");
+        if (match)
+            return match;
+
+        if (categories)
+            for (const [key, value] of Object.entries(categoryIcons))
+                if (categories.includes(key))
+                    return value;
+
+        return "apps";
+    }
+
+    function isCriticalUrgency(urgency: var): bool {
+        return urgency === NotificationUrgency.Critical || urgency === "critical";
+    }
+
+    function getNotifAppIcon(appIcon: string, appName: string, summary: string, urgency: var): string {
+        const match = matchIcon(`${appIcon} ${appName} ${summary}`.toLowerCase(), notifAppIconRules, "");
+        return match || getNotifIcon(summary, urgency);
+    }
+
+    function getMenuIcon(icon: string, text: string): string {
+        return matchIcon(`${text} ${icon}`.toLowerCase(), menuIconRules, "radio_button_checked");
+    }
+
+    function getTrayFallbackIcon(id: string, title: string): string {
+        return matchIcon(`${id} ${title}`.toLowerCase(), trayIconRules, "widgets");
+    }
+
+    function getFileFallbackIcon(mimeType: string, name: string, isDir: bool): string {
+        if (isDir)
+            return "folder";
+
+        const mime = (mimeType || "").toLowerCase();
+        if (mime.startsWith("image/"))
+            return "image";
+        if (mime.startsWith("video/"))
+            return "movie";
+        if (mime.startsWith("audio/"))
+            return "audio_file";
+        if (mime.includes("zip") || mime.includes("compressed") || mime.includes("archive"))
+            return "folder_zip";
+        if (mime.includes("pdf"))
+            return "picture_as_pdf";
+        if (mime.includes("font"))
+            return "font_download";
+        if (mime.includes("executable"))
+            return "terminal";
+        if (mime.includes("javascript") || mime.includes("json") || mime.includes("xml") || mime.includes("text/x-"))
+            return "code";
+        if (mime.startsWith("text/"))
+            return "description";
+
+        return "draft";
     }
 
     function getAppCategoryIcon(name: string, fallback: string): string {
@@ -188,8 +437,8 @@ Singleton {
         return weatherIcons[code] ?? "air";
     }
 
-    function getNotifIcon(summary: string, urgency: int): string {
-        const fallback = urgency === NotificationUrgency.Critical ? "release_alert" : "chat";
+    function getNotifIcon(summary: string, urgency: var): string {
+        const fallback = isCriticalUrgency(urgency) ? "release_alert" : "chat";
         return matchIcon(summary.toLowerCase(), notifIconRules, fallback);
     }
 
@@ -210,15 +459,9 @@ Singleton {
     function getTrayIcon(id: string, icon: string): string {
         for (const sub of GlobalConfig.bar.tray.iconSubs.values)
             if (sub.id === id)
-                return sub.image ? Qt.resolvedUrl(sub.image) : Quickshell.iconPath(sub.icon);
+                return sub.image ? toImageSource(sub.image) : resolveIcon(sub.icon, "");
 
-        if (icon.includes("?path=")) {
-            const [name, path] = icon.split("?path=");
-            const file = name.slice(name.lastIndexOf("/") + 1);
-            const themed = Quickshell.iconPath(file, true);
-            icon = themed ? themed : Qt.resolvedUrl(`${path}/${file}`);
-        }
-        return icon;
+        return resolveSource(icon);
     }
 
     function getBatteryIcon(percentage: real, charging = false): string {

@@ -3,11 +3,12 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import Quickshell
-import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
+import qs.components.images
 import qs.services
+import qs.utils
 
 StackView {
     id: root
@@ -130,11 +131,13 @@ StackView {
 
                             active: item.modelData.icon !== ""
 
-                            sourceComponent: IconImage {
-                                asynchronous: true
+                            sourceComponent: SmartIcon {
                                 implicitSize: label.implicitHeight
-
-                                source: item.modelData.icon
+                                icon: item.modelData.icon
+                                fallbackIcon: Icons.getMenuIcon(item.modelData.icon, item.modelData.text)
+                                iconColour: item.modelData.enabled ? Colours.palette.m3onSurface : Colours.palette.m3outline
+                                colorise: item.modelData.icon.endsWith("-symbolic")
+                                showFallbackBackground: false
                             }
                         }
 

@@ -1,8 +1,8 @@
 import QtQuick
 import Quickshell
-import Quickshell.Widgets
 import Caelestia.Config
 import qs.components
+import qs.components.images
 import qs.services
 import qs.utils
 import qs.modules.launcher.services
@@ -32,14 +32,14 @@ Item {
         anchors.rightMargin: Tokens.padding.medium
         anchors.margins: Tokens.padding.small
 
-        IconImage {
+        SmartIcon {
             id: icon
 
-            asynchronous: true
-            source: Quickshell.iconPath(root.modelData?.icon, "image-missing")
-            implicitSize: parent.height * 0.8
-
             anchors.verticalCenter: parent.verticalCenter
+            implicitSize: parent.height * 0.8
+            icon: root.modelData?.icon ?? ""
+            fallbackText: root.modelData?.name ?? root.modelData?.id ?? ""
+            fallbackIcon: Icons.getAppFallbackIcon(root.modelData?.id ?? "", root.modelData?.categories ?? [], root.modelData?.icon ?? "")
         }
 
         Item {

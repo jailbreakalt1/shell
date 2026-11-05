@@ -36,11 +36,28 @@ Item {
             radius: Tokens.rounding.largeIncreased
             color: Colours.tPalette.m3surfaceContainer
 
+            readonly property int colourSeed: {
+                let hash = 0;
+                const value = label.text || "";
+                for (let i = 0; i < value.length; i++)
+                    hash = ((hash << 5) - hash + value.charCodeAt(i)) | 0;
+                return Math.abs(hash);
+            }
+            readonly property var fallbackPalette: [
+                Colours.palette.term4 || Colours.palette.m3primary,
+                Colours.palette.term5 || Colours.palette.m3tertiary,
+                Colours.palette.term6 || Colours.palette.m3secondary,
+                Colours.palette.term2 || Colours.palette.m3primary,
+                Colours.palette.term9 || Colours.palette.m3error,
+                Colours.palette.term12 || Colours.palette.m3tertiary
+            ]
+            readonly property color fallbackColour: fallbackPalette[colourSeed % fallbackPalette.length]
+
             Loader {
                 anchors.centerIn: parent
 
                 opacity: img.status === Image.Ready ? 0 : 1
-                active: opacity > 0
+                active: img.source.toString() !== "" && (img.status === Image.Loading || img.status === Image.Null)
 
                 sourceComponent: StyledRect {
                     implicitWidth: loadingIndicator.implicitSize + Tokens.padding.large * 2
@@ -62,6 +79,30 @@ Item {
                     Anim {
                         type: Anim.DefaultEffects
                     }
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+
+                visible: !img.source.toString() || img.status === Image.Error
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0
+                        color: Qt.rgba(imgWrapper.fallbackColour.r * 0.22, imgWrapper.fallbackColour.g * 0.22, imgWrapper.fallbackColour.b * 0.22, 1)
+                    }
+                    GradientStop {
+                        position: 1
+                        color: Colours.palette.m3surfaceContainer
+                    }
+                }
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+
+                    text: "image"
+                    color: Qt.lighter(imgWrapper.fallbackColour, 1.2)
+                    fontStyle: Tokens.font.icon.size(parent.width * 0.25).build()
                 }
             }
 

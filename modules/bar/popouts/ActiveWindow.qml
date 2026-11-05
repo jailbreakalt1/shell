@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import Quickshell.Widgets
 import Caelestia.Config
 import qs.components
+import qs.components.images
 import qs.services
 import qs.utils
 
@@ -28,13 +29,14 @@ Item {
             anchors.right: parent.right
             spacing: Tokens.spacing.medium
 
-            IconImage {
+            SmartIcon {
                 id: icon
 
-                asynchronous: true
                 Layout.alignment: Qt.AlignVCenter
                 implicitSize: details.implicitHeight
-                source: Icons.getAppIcon(Hypr.activeToplevel?.lastIpcObject.class ?? "", "image-missing")
+                icon: Icons.getAppIcon(Hypr.activeToplevel?.lastIpcObject.class ?? "", "")
+                fallbackText: Hypr.activeToplevel?.lastIpcObject.class ?? ""
+                fallbackIcon: Icons.getAppCategoryIcon(Hypr.activeToplevel?.lastIpcObject.class ?? "", "apps")
             }
 
             ColumnLayout {

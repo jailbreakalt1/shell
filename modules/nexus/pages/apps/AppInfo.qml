@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
+import qs.components.images
 import qs.services
 import qs.utils
 import qs.modules.nexus.common
@@ -46,10 +46,11 @@ PageBase {
             Layout.bottomMargin: Tokens.spacing.large
             spacing: Tokens.spacing.large
 
-            IconImage {
-                asynchronous: true
+            SmartIcon {
                 implicitSize: Math.round(Tokens.font.icon.large.pointSize * 3)
-                source: Quickshell.iconPath(root.app?.icon, "image-missing")
+                icon: root.app?.icon ?? ""
+                fallbackText: root.app?.name ?? root.app?.id ?? ""
+                fallbackIcon: Icons.getAppFallbackIcon(root.app?.id ?? "", root.app?.categories ?? [], root.app?.icon ?? "")
             }
 
             ColumnLayout {

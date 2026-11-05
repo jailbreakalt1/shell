@@ -9,6 +9,7 @@ import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.components.effects
+import qs.components.images
 import qs.services
 import qs.utils
 
@@ -192,16 +193,14 @@ StyledRect {
                     implicitWidth: TokenConfig.sizes.notifs.image
                     implicitHeight: TokenConfig.sizes.notifs.image
 
-                    Image {
+                    SmartIcon {
                         anchors.fill: parent
-                        source: Qt.resolvedUrl(root.modelData.image)
-                        fillMode: Image.PreserveAspectCrop
-                        sourceSize: {
-                            const size = TokenConfig.sizes.notifs.image * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1);
-                            return Qt.size(size, size);
-                        }
-                        cache: false
-                        asynchronous: true
+
+                        icon: root.modelData.image
+                        fallbackIcon: "broken_image"
+                        fallbackContentColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                        fillModeCrop: true
+                        showFallbackBackground: false
                     }
                 }
             }
@@ -223,36 +222,16 @@ StyledRect {
                     implicitWidth: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
                     implicitHeight: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
 
-                    Loader {
-                        id: icon
-
-                        asynchronous: true
-                        active: root.hasAppIcon
-
+                    SmartIcon {
                         anchors.centerIn: parent
 
-                        width: Math.round(parent.width * 0.6)
-                        height: Math.round(parent.width * 0.6)
-
-                        sourceComponent: ColouredIcon {
-                            anchors.fill: parent
-                            source: Quickshell.iconPath(root.modelData.appIcon)
-                            colour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                            layer.enabled: root.modelData.appIcon.endsWith("symbolic")
-                        }
-                    }
-
-                    Loader {
-                        asynchronous: true
-                        active: !root.hasAppIcon
-                        anchors.centerIn: parent
-                        anchors.verticalCenterOffset: 1
-
-                        sourceComponent: MaterialIcon {
-                            text: Icons.getNotifIcon(root.modelData.summary, root.modelData.urgency)
-                            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                            fontStyle: Tokens.font.icon.medium
-                        }
+                        implicitSize: Math.round(parent.width * 0.6)
+                        icon: root.modelData.appIcon
+                        fallbackIcon: Icons.getNotifAppIcon(root.modelData.appIcon, root.modelData.appName, root.modelData.summary, root.modelData.urgency)
+                        fallbackContentColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                        iconColour: fallbackContentColour
+                        colorise: root.modelData.appIcon.endsWith("-symbolic")
+                        showFallbackBackground: false
                     }
                 }
             }

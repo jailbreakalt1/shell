@@ -3,10 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
+import qs.components.images
 import qs.services
 import qs.utils
 import qs.modules.nexus.common
@@ -55,10 +55,11 @@ PageBase {
                     anchors.rightMargin: Tokens.padding.largeIncreased
                     spacing: Tokens.spacing.medium
 
-                    IconImage {
-                        asynchronous: true
+                    SmartIcon {
                         implicitSize: Math.round(Tokens.font.icon.large.pointSize * 1.8)
-                        source: Quickshell.iconPath(appItem.modelData.icon, "image-missing")
+                        icon: appItem.modelData.icon
+                        fallbackText: appItem.modelData.name
+                        fallbackIcon: Icons.getAppFallbackIcon(appItem.modelData.id, appItem.modelData.categories, appItem.modelData.icon)
                     }
 
                     ColumnLayout {

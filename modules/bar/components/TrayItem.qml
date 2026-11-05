@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell.Services.SystemTray
 import Caelestia.Config
 import qs.components.effects
+import qs.components.images
 import qs.services
 import qs.utils
 
@@ -23,12 +24,14 @@ MouseArea {
             modelData.secondaryActivate();
     }
 
-    ColouredIcon {
+    SmartIcon {
         id: icon
 
         anchors.fill: parent
-        source: Icons.getTrayIcon(root.modelData.id, root.modelData.icon)
-        colour: Colours.palette.m3secondary
-        layer.enabled: Config.bar.tray.recolour
+        icon: Icons.getTrayIcon(root.modelData.id, root.modelData.icon)
+        fallbackIcon: Icons.getTrayFallbackIcon(root.modelData.id, root.modelData.title)
+        iconColour: Colours.palette.m3secondary
+        colorise: Config.bar.tray.recolour
+        showFallbackBackground: false
     }
 }
