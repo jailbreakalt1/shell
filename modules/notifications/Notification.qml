@@ -8,7 +8,6 @@ import Caelestia.Components
 import Caelestia.Config
 import qs.components
 import qs.components.controls
-import qs.components.effects
 import qs.components.images
 import qs.services
 import qs.utils
@@ -19,91 +18,54 @@ StyledRect {
     required property NotifData modelData
     readonly property bool hasImage: modelData.image.length > 0
     readonly property bool hasAppIcon: modelData.appIcon.length > 0
-    readonly property int bodyTextFormat: /[<*_`#\[\]]/.test(modelData.body) ? Text.MarkdownText : Text.PlainText
+    readonly property bool critical: modelData.urgency === NotificationUrgency.Critical
+    readonly property bool low: modelData.urgency === NotificationUrgency.Low
+    readonly property color accentColour: critical ? Colours.disabledRed : Colours.enabledGreen
+    readonly property color mutedColour: critical ? Colours.disabledRed : Colours.enabledGreenMuted
+    readonly property string displayBody: Strings.notificationBody(modelData.body)
+    readonly property int bodyTextFormat: /[<*_`#\[\]]/.test(displayBody) ? Text.MarkdownText : Text.PlainText
     readonly property bool bodyHasMarkup: Strings.hasMarkup(modelData.body)
     // TextMetrics elides raw text without understanding textFormat, so the
-    // preview must be markup-free. Keep the expanded body untouched.
+    // preview must be markup-free. The expanded body drops the source-site
+    // paragraph Chromium prepends, but keeps links in the message.
     readonly property string bodyPreviewText: bodyHasMarkup ? Strings.notificationPreview(modelData.body) : modelData.body
     readonly property int bodyPreviewTextFormat: bodyHasMarkup ? Text.PlainText : bodyTextFormat
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? Tokens.spacing.extraSmall * 2 + appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
     property bool expanded: Config.notifs.openExpanded
-    property bool hovered: false
-    property real glassMorph: 0
-    property real hoverMorph: 0
-    property real glassRadius: Tokens.rounding.large
 
-    color: "transparent"
+    color: Colours.deepBlack
     radius: Tokens.rounding.large
+    border.width: 1
+    border.color: root.critical ? Qt.alpha(Colours.disabledRed, 0.55) : Qt.alpha(Colours.enabledGreenMuted, 0.32)
 
     implicitHeight: inner.implicitHeight
+
+    // Some emoji fonts (notably the 3D Noto variant) report a huge line
+    // height even though the glyph itself is normal sized. Pinning the line
+    // height keeps message cards from growing to several hundred pixels.
+    FontMetrics {
+        id: bodyMetrics
+
+        font: Tokens.font.body.small
+    }
+
+    FontMetrics {
+        id: labelMetrics
+
+        font: Tokens.font.label.medium
+    }
 
     x: implicitWidth
     Component.onCompleted: {
         x = 0;
         modelData.lock(this);
-        updateGlassRadius();
-        glassMorph = 1;
-        glassSettle.start();
     }
     Component.onDestruction: modelData.unlock(this)
-
-    onExpandedChanged: {
-        updateGlassRadius();
-        if (expanded) {
-            glassMorph = 1;
-            glassSettle.restart();
-        }
-    }
-
-    onHoveredChanged: updateGlassRadius()
-
-    function updateGlassRadius(): void {
-        glassRadius = expanded ? radius * 1.55 : hovered ? radius * 1.25 : radius;
-    }
 
     Behavior on x {
         Anim {
             easing: Tokens.anim.emphasizedDecel
         }
-    }
-
-    Behavior on hoverMorph {
-        Anim {
-            type: Anim.DefaultEffects
-        }
-    }
-
-    Behavior on glassRadius {
-        Anim {
-            type: Anim.SlowEffects
-        }
-    }
-
-    NumberAnimation {
-        id: glassSettle
-
-        target: root
-        property: "glassMorph"
-        to: 0
-        duration: 1100
-        easing.type: Easing.OutElastic
-        easing.amplitude: 0.45
-        easing.period: 0.6
-    }
-
-    LiquidGlass {
-        anchors.fill: parent
-        radius: root.glassRadius + root.glassMorph * 4
-        morph: Math.max(root.glassMorph, root.hoverMorph)
-        tint: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceBright
-        tintStrength: 0.2
-        glassOpacity: 0.84
-        chroma: 1
-        refraction: 0.1
-        bevelDepth: 0.22
-        bevelWidth: 0.14
-        specularIntensity: 1.6
-        frost: 1.4
     }
 
     MouseArea {
@@ -115,14 +77,8 @@ StyledRect {
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
         preventStealing: true
 
-        onEntered: {
-            root.modelData.timer.stop();
-            root.hovered = true;
-            root.hoverMorph = 0.8;
-        }
+        onEntered: root.modelData.timer.stop()
         onExited: {
-            root.hovered = false;
-            root.hoverMorph = 0;
             if (!pressed)
                 root.modelData.timer.start();
         }
@@ -189,7 +145,7 @@ StyledRect {
 
                 sourceComponent: StyledClippingRect {
                     radius: Tokens.rounding.full
-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.modelData.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHighest, 2) : Colours.palette.m3secondaryContainer
+                    color: root.critical ? Qt.alpha(Colours.disabledRed, 0.22) : root.low ? Qt.alpha(Colours.enabledGreenMuted, 0.1) : Qt.alpha(Colours.enabledGreen, 0.16)
                     implicitWidth: TokenConfig.sizes.notifs.image
                     implicitHeight: TokenConfig.sizes.notifs.image
 
@@ -198,7 +154,7 @@ StyledRect {
 
                         icon: root.modelData.image
                         fallbackIcon: "broken_image"
-                        fallbackContentColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                        fallbackContentColour: root.critical ? Colours.disabledRed : root.low ? Colours.enabledGreenMuted : Colours.enabledGreen
                         fillModeCrop: true
                         showFallbackBackground: false
                     }
@@ -218,7 +174,7 @@ StyledRect {
 
                 sourceComponent: StyledRect {
                     radius: Tokens.rounding.full
-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.modelData.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHighest, 2) : Colours.palette.m3secondaryContainer
+                    color: root.critical ? Qt.alpha(Colours.disabledRed, 0.22) : root.low ? Qt.alpha(Colours.enabledGreenMuted, 0.1) : Qt.alpha(Colours.enabledGreen, 0.16)
                     implicitWidth: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
                     implicitHeight: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
 
@@ -228,7 +184,7 @@ StyledRect {
                         implicitSize: Math.round(parent.width * 0.6)
                         icon: root.modelData.appIcon
                         fallbackIcon: Icons.getNotifAppIcon(root.modelData.appIcon, root.modelData.appName, root.modelData.summary, root.modelData.urgency)
-                        fallbackContentColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                        fallbackContentColour: root.critical ? Colours.disabledRed : root.low ? Colours.enabledGreenMuted : Colours.enabledGreen
                         iconColour: fallbackContentColour
                         colorise: root.modelData.appIcon.endsWith("-symbolic")
                         showFallbackBackground: false
@@ -250,7 +206,7 @@ StyledRect {
                     capStyle: ShapePath.RoundCap
                     fillColor: "transparent"
                     strokeWidth: 2
-                    strokeColor: Colours.palette.m3primary
+                    strokeColor: root.accentColour
 
                     PathAngleArc {
                         id: progressArc
@@ -282,8 +238,10 @@ StyledRect {
                 animate: true
                 text: appNameMetrics.elidedText
                 maximumLineCount: 1
-                color: Colours.palette.m3onSurfaceVariant
+                color: root.mutedColour
                 font: Tokens.font.label.medium
+                lineHeightMode: Text.FixedHeight
+                lineHeight: labelMetrics.lineSpacing
 
                 opacity: root.expanded ? 1 : 0
 
@@ -314,6 +272,9 @@ StyledRect {
                 text: summaryMetrics.elidedText
                 maximumLineCount: 1
                 height: implicitHeight
+                color: root.critical ? Colours.disabledRed : Colours.enabledGreen
+                lineHeightMode: Text.FixedHeight
+                lineHeight: bodyMetrics.lineSpacing
 
                 states: State {
                     name: "expanded"
@@ -365,8 +326,10 @@ StyledRect {
                 anchors.leftMargin: Tokens.spacing.small
 
                 text: "•"
-                color: Colours.palette.m3onSurfaceVariant
+                color: root.mutedColour
                 font: Tokens.font.body.small
+                lineHeightMode: Text.FixedHeight
+                lineHeight: bodyMetrics.lineSpacing
 
                 states: State {
                     name: "expanded"
@@ -393,8 +356,10 @@ StyledRect {
                 animate: true
                 horizontalAlignment: Text.AlignLeft
                 text: root.modelData.timeStr
-                color: Colours.palette.m3onSurfaceVariant
+                color: root.mutedColour
                 font: Tokens.font.body.small
+                lineHeightMode: Text.FixedHeight
+                lineHeight: bodyMetrics.lineSpacing
             }
 
             Item {
@@ -409,7 +374,7 @@ StyledRect {
 
                 StateLayer {
                     radius: Tokens.rounding.full
-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                    color: root.accentColour
                     onClicked: root.expanded = !root.expanded
                 }
 
@@ -419,6 +384,7 @@ StyledRect {
                     anchors.centerIn: parent
                     anchors.verticalCenterOffset: root.expanded ? -1 : 1
                     text: "expand_more"
+                    color: root.mutedColour
                     fontStyle: Tokens.font.icon.medium
                     rotation: root.expanded ? 180 : 0
 
@@ -442,9 +408,14 @@ StyledRect {
 
                 animate: true
                 textFormat: root.bodyPreviewTextFormat
-                text: bodyPreviewMetrics.elidedText
-                color: Colours.palette.m3onSurfaceVariant
+                text: root.bodyPreviewText
+                color: root.mutedColour
                 font: Tokens.font.body.small
+                lineHeightMode: Text.FixedHeight
+                lineHeight: bodyMetrics.lineSpacing
+                elide: Text.ElideRight
+                maximumLineCount: 1
+                height: text ? implicitHeight : 0
 
                 opacity: root.expanded ? 0 : 1
 
@@ -453,15 +424,6 @@ StyledRect {
                         type: Anim.DefaultEffects
                     }
                 }
-            }
-
-            TextMetrics {
-                id: bodyPreviewMetrics
-
-                text: root.bodyPreviewText
-                font: bodyPreview.font
-                elide: Text.ElideRight
-                elideWidth: bodyPreview.width
             }
 
             StyledText {
@@ -474,9 +436,12 @@ StyledRect {
 
                 animate: true
                 textFormat: root.bodyTextFormat
-                text: root.modelData.body
-                color: Colours.palette.m3onSurfaceVariant
+                text: root.displayBody
+                color: root.mutedColour
+                linkColor: root.accentColour
                 font: Tokens.font.body.small
+                lineHeightMode: Text.FixedHeight
+                lineHeight: bodyMetrics.lineSpacing
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 height: text ? implicitHeight : 0
 
@@ -518,8 +483,8 @@ StyledRect {
                     isRound: true
                     shapeMorph: true
                     fillWidth: root.modelData.actions.length === 0
-                    inactiveColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
-                    inactiveOnColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
+                    inactiveColour: root.critical ? Qt.alpha(Colours.disabledRed, 0.14) : Qt.alpha(Colours.enabledGreenMuted, 0.12)
+                    inactiveOnColour: root.accentColour
                     icon: "close"
                     padding: Tokens.padding.extraSmall
                     onClicked: root.modelData.close()
@@ -534,8 +499,8 @@ StyledRect {
                         isRound: true
                         shapeMorph: true
                         fillWidth: true
-                        inactiveColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
-                        inactiveOnColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
+                        inactiveColour: root.critical ? Qt.alpha(Colours.disabledRed, 0.14) : Qt.alpha(Colours.enabledGreenMuted, 0.12)
+                        inactiveOnColour: root.accentColour
                         text: modelData.text
                         onClicked: modelData.invoke()
 
@@ -546,6 +511,8 @@ StyledRect {
                         label.anchors.centerIn: undefined
                         label.anchors.margins: Tokens.padding.medium
                         label.elide: Text.ElideRight
+                        label.lineHeightMode: Text.FixedHeight
+                        label.lineHeight: bodyMetrics.lineSpacing
                     }
                 }
 
@@ -553,8 +520,8 @@ StyledRect {
                     isRound: true
                     shapeMorph: true
                     fillWidth: root.modelData.actions.length === 0
-                    inactiveColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
-                    inactiveOnColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
+                    inactiveColour: root.critical ? Qt.alpha(Colours.disabledRed, 0.14) : Qt.alpha(Colours.enabledGreenMuted, 0.12)
+                    inactiveOnColour: root.accentColour
                     icon: copyTimer.running ? "inventory" : "content_copy"
                     padding: Tokens.padding.extraSmall
                     onClicked: {

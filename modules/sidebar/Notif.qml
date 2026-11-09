@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.Notifications
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
@@ -17,14 +18,22 @@ StyledRect {
     required property ScreenState screenState
 
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
+    readonly property bool critical: modelData?.urgency === NotificationUrgency.Critical
+    readonly property string displayBody: Strings.notificationBody(String(modelData?.body ?? ""))
+    readonly property bool displayBodyHasMarkup: Strings.hasMarkup(displayBody)
     readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Tokens.padding.medium * 2 : summaryHeightMetrics.height
 
     implicitHeight: nonAnimHeight
 
     radius: Tokens.rounding.medium
-    color: {
-        const c = root.modelData?.urgency === "critical" ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
-        return expanded ? c : Qt.alpha(c, 0);
+    color: !expanded ? "transparent" : root.critical ? Qt.alpha(Colours.disabledRed, 0.1) : Qt.alpha(Colours.enabledGreenMuted, 0.06)
+    border.width: expanded ? 1 : 0
+    border.color: root.critical ? Qt.alpha(Colours.disabledRed, 0.45) : Qt.alpha(Colours.enabledGreenMuted, 0.22)
+
+    FontMetrics {
+        id: bodyMetrics
+
+        font: Tokens.font.body.small
     }
 
     state: expanded ? "expanded" : ""
@@ -64,7 +73,9 @@ StyledRect {
 
         width: parent.width
         text: root.modelData?.summary ?? ""
-        color: root.modelData?.urgency === "critical" ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+        color: root.critical ? Colours.disabledRed : Colours.enabledGreen
+        lineHeightMode: Text.FixedHeight
+        lineHeight: bodyMetrics.lineSpacing
         elide: Text.ElideRight
         wrapMode: Text.WordWrap
         maximumLineCount: 1
@@ -91,7 +102,9 @@ StyledRect {
 
         sourceComponent: StyledText {
             text: Strings.notificationPreview(String(root.modelData?.body ?? "")).replace(/\n/g, " ")
-            color: root.modelData?.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline
+            color: root.critical ? Colours.disabledRed : Colours.enabledGreenMuted
+            lineHeightMode: Text.FixedHeight
+            lineHeight: bodyMetrics.lineSpacing
             elide: Text.ElideRight
         }
     }
@@ -106,8 +119,10 @@ StyledRect {
         sourceComponent: StyledText {
             animate: true
             text: root.modelData?.timeStr ?? ""
-            color: Colours.palette.m3outline
+            color: root.critical ? Qt.alpha(Colours.disabledRed, 0.75) : Colours.enabledGreenMuted
             font: Tokens.font.body.small
+            lineHeightMode: Text.FixedHeight
+            lineHeight: bodyMetrics.lineSpacing
         }
     }
 
@@ -136,9 +151,12 @@ StyledRect {
             id: bodyText
 
             Layout.fillWidth: true
-            textFormat: Text.MarkdownText
-            text: String(root.modelData?.body ?? "").replace(/(.)\n(?!\n)/g, "$1\n\n") || Tr.tr("No body here! :/")
-            color: root.modelData?.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline
+            textFormat: root.displayBodyHasMarkup ? Text.MarkdownText : Text.PlainText
+            text: root.displayBody || Tr.tr("No body here! :/")
+            color: root.critical ? Qt.alpha(Colours.disabledRed, 0.85) : Colours.enabledGreenMuted
+            linkColor: root.critical ? Colours.disabledRed : Colours.enabledGreen
+            lineHeightMode: Text.FixedHeight
+            lineHeight: bodyMetrics.lineSpacing
             wrapMode: Text.WordWrap
 
             onLinkActivated: link => {

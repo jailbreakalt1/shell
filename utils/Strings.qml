@@ -33,6 +33,23 @@ Singleton {
         return preview.length > 0 ? preview : stripMarkup(text);
     }
 
+    // Expanded bodies need the same cleanup, but keep the markup so links in
+    // the message still work. Chromium prepends a source-site link paragraph
+    // and web apps often leave long runs of blank lines behind it.
+    function notificationBody(text: string): string {
+        if (!text)
+            return text;
+
+        let body = text.replace(/\r\n/g, "\n");
+        if (hasMarkup(body)) {
+            const withoutLeadingLink = body.replace(/^\s*<a\b[^>]*>[\s\S]*?<\/a>[ \t]*(?:\n\s*)+/i, "");
+            if (stripMarkup(withoutLeadingLink).length > 0)
+                body = withoutLeadingLink;
+        }
+
+        return body.replace(/\n(?:[ \t]*\n){2,}/g, "\n\n").trim();
+    }
+
     function escapeHtml(text: string): string {
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }

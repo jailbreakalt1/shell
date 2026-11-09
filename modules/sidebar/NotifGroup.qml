@@ -31,6 +31,11 @@ StyledRect {
             return NotificationUrgency.Normal;
         return NotificationUrgency.Low;
     }
+    readonly property bool critical: urgency === NotificationUrgency.Critical
+    readonly property bool low: urgency === NotificationUrgency.Low
+    readonly property color accentColour: critical ? Colours.disabledRed : low ? Colours.enabledGreenMuted : Colours.enabledGreen
+    readonly property color mutedColour: critical ? Qt.alpha(Colours.disabledRed, 0.8) : Colours.enabledGreenMuted
+    readonly property color iconBackground: critical ? Qt.alpha(Colours.disabledRed, 0.2) : Qt.alpha(accentColour, low ? 0.08 : 0.14)
 
     readonly property int nonAnimHeight: {
         const headerHeight = header.implicitHeight + (root.expanded ? Math.round(Tokens.spacing.extraSmall) : 0);
@@ -59,7 +64,15 @@ StyledRect {
 
     clip: true
     radius: Tokens.rounding.large
-    color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+    color: Colours.deepBlack
+    border.width: 1
+    border.color: root.critical ? Qt.alpha(Colours.disabledRed, 0.35) : Qt.alpha(Colours.enabledGreenMuted, 0.18)
+
+    FontMetrics {
+        id: bodyMetrics
+
+        font: Tokens.font.body.small
+    }
 
     Behavior on implicitHeight {
         Anim {}
@@ -87,7 +100,7 @@ StyledRect {
                     implicitSize: TokenConfig.sizes.notifs.image
                     icon: root.image
                     fallbackIcon: "broken_image"
-                    fallbackContentColour: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    fallbackContentColour: root.accentColour
                     fillModeCrop: true
                     showFallbackBackground: false
                 }
@@ -100,7 +113,7 @@ StyledRect {
                     implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
                     icon: root.appIcon
                     fallbackIcon: Icons.getNotifAppIcon(root.appIcon, root.modelData, root.activeNotifs[0]?.summary, root.urgency)
-                    fallbackContentColour: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    fallbackContentColour: root.accentColour
                     iconColour: fallbackContentColour
                     colorise: root.appIcon.endsWith("-symbolic")
                     showFallbackBackground: false
@@ -112,14 +125,14 @@ StyledRect {
 
                 MaterialIcon {
                     text: Icons.getNotifIcon(root.activeNotifs[0]?.summary, root.urgency)
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    color: root.accentColour
                     fontStyle: Tokens.font.icon.medium
                 }
             }
 
             StyledClippingRect {
                 anchors.fill: parent
-                color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHigh, 3) : Colours.palette.m3secondaryContainer
+                color: root.iconBackground
                 radius: Tokens.rounding.full
 
                 Loader {
@@ -140,7 +153,7 @@ StyledRect {
                     implicitWidth: Tokens.sizes.notifs.badge
                     implicitHeight: Tokens.sizes.notifs.badge
 
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.urgency === NotificationUrgency.Low ? Colours.palette.m3surfaceContainerHigh : Colours.palette.m3secondaryContainer
+                    color: root.iconBackground
                     radius: Tokens.rounding.full
 
                     SmartIcon {
@@ -148,7 +161,7 @@ StyledRect {
                         implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
                         icon: root.appIcon
                         fallbackIcon: Icons.getNotifAppIcon(root.appIcon, root.modelData, root.activeNotifs[0]?.summary, root.urgency)
-                        fallbackContentColour: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                        fallbackContentColour: root.accentColour
                         iconColour: fallbackContentColour
                         colorise: root.appIcon.endsWith("-symbolic")
                         showFallbackBackground: false
@@ -177,27 +190,31 @@ StyledRect {
                 StyledText {
                     Layout.fillWidth: true
                     text: root.modelData
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: root.mutedColour
                     font: Tokens.font.body.small
+                    lineHeightMode: Text.FixedHeight
+                    lineHeight: bodyMetrics.lineSpacing
                     elide: Text.ElideRight
                 }
 
                 StyledText {
                     animate: true
                     text: root.activeNotifs[0]?.timeStr ?? ""
-                    color: Colours.palette.m3outline
+                    color: root.mutedColour
                     font: Tokens.font.body.small
+                    lineHeightMode: Text.FixedHeight
+                    lineHeight: bodyMetrics.lineSpacing
                 }
 
                 StyledRect {
                     implicitWidth: expandBtn.implicitWidth + Tokens.padding.large
                     implicitHeight: groupCount.implicitHeight + Tokens.padding.extraSmall
 
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : Colours.layer(Colours.palette.m3surfaceContainerHigh, 3)
+                    color: root.critical ? Qt.alpha(Colours.disabledRed, 0.16) : Qt.alpha(Colours.enabledGreenMuted, 0.12)
                     radius: Tokens.rounding.full
 
                     StateLayer {
-                        color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                        color: root.accentColour
                         onClicked: root.toggleExpand(!root.expanded)
                     }
 
@@ -213,14 +230,16 @@ StyledRect {
                             Layout.leftMargin: Tokens.padding.extraSmall / 2
                             animate: true
                             text: root.notifCount
-                            color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurfaceVariant
+                            color: root.accentColour
                             font: Tokens.font.body.small
+                            lineHeightMode: Text.FixedHeight
+                            lineHeight: bodyMetrics.lineSpacing
                         }
 
                         MaterialIcon {
                             Layout.rightMargin: -Tokens.padding.extraSmall / 2
                             text: "expand_more"
-                            color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurfaceVariant
+                            color: root.accentColour
                             rotation: root.expanded ? 180 : 0
                             Layout.topMargin: root.expanded ? -Math.floor(Tokens.padding.extraSmall) : 0
 

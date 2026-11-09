@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Quickshell.Services.Notifications
 import Caelestia.Config
 import qs.components
 import qs.components.containers
@@ -16,8 +17,17 @@ Item {
 
     required property NotifData notif
 
+    readonly property bool critical: notif?.urgency === NotificationUrgency.Critical
+    readonly property color accentColour: critical ? Colours.disabledRed : Colours.enabledGreen
+
     Layout.fillWidth: true
     implicitHeight: flickable.contentHeight
+
+    FontMetrics {
+        id: bodyMetrics
+
+        font: Tokens.font.body.small
+    }
 
     layer.enabled: true
     layer.smooth: true
@@ -124,7 +134,7 @@ Item {
 
                     Layout.preferredWidth: implicitWidth + (actionStateLayer.pressed ? Tokens.padding.large : 0)
                     radius: actionStateLayer.pressed ? Tokens.rounding.medium / 2 : Tokens.rounding.medium
-                    color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
+                    color: root.critical ? Qt.alpha(Colours.disabledRed, 0.12) : Qt.alpha(Colours.enabledGreenMuted, 0.1)
 
                     Timer {
                         id: copyTimer
@@ -135,6 +145,8 @@ Item {
 
                     StateLayer {
                         id: actionStateLayer
+
+                        color: root.accentColour
 
                         onClicked: {
                             if (action.modelData.isClose) {
@@ -164,7 +176,7 @@ Item {
                         MaterialIcon {
                             animate: action.modelData.isCopy ?? false
                             text: action.modelData.isCopy ? "content_copy" : "close"
-                            color: Colours.palette.m3onSurfaceVariant
+                            color: root.accentColour
                         }
                     }
 
@@ -175,7 +187,7 @@ Item {
                             implicitSize: Math.round(Tokens.font.icon.small.pointSize * 1.25)
                             icon: action.modelData.identifier
                             fallbackIcon: "touch_app"
-                            iconColour: Colours.palette.m3onSurfaceVariant
+                            iconColour: root.accentColour
                             showFallbackBackground: false
                         }
                     }
@@ -185,7 +197,9 @@ Item {
 
                         StyledText {
                             text: action.modelData.text
-                            color: Colours.palette.m3onSurfaceVariant
+                            color: root.accentColour
+                            lineHeightMode: Text.FixedHeight
+                            lineHeight: bodyMetrics.lineSpacing
                         }
                     }
 
