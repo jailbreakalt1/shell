@@ -270,15 +270,13 @@ Item {
             required property int index
 
             readonly property bool focused: ListView.isCurrentItem
-            readonly property int distance: Math.abs(index - lyrics.currentIndex)
-            readonly property bool neighbour: distance === 1
             property real effectScale: focused ? 1 : 0
 
             anchors.left: lyrics.contentItem.left
             anchors.right: lyrics.contentItem.right
 
             text: modelData || ". . ."
-            color: focused ? root.focusColour : neighbour ? root.accentColour : mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.85) : Qt.rgba(1, 1, 1, 0.45)
+            color: focused ? root.focusColour : mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.85) : Qt.rgba(1, 1, 1, 0.45)
             font: Tokens.font.body.builders.medium.family("Ananda Black Personal Use").build()
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
