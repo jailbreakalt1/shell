@@ -68,7 +68,7 @@ Singleton {
     }
 
     function mediaAccent(c: color): color {
-        if (c.a <= 0 || c.hslLightness < 0.02 || c.hslSaturation < 0.04)
+        if (c.a <= 0 || c.hslSaturation < 0.04)
             return mediaNeutral;
 
         const lightness = light

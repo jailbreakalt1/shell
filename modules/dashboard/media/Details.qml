@@ -11,6 +11,8 @@ import qs.services
 ColumnLayout {
     id: root
 
+    property color accentColour: Colours.mediaNeutral
+
     readonly property bool hasUnknownLength: (Players.active?.length ?? 0) > 2147483647
 
     function lengthStr(length: int): string {
@@ -39,6 +41,7 @@ ColumnLayout {
     StyledText {
         Layout.fillWidth: true
         text: Players.active?.trackTitle ?? ""
+        color: root.accentColour
         font: Tokens.font.title.builders.large.family("Sketch Book").build()
         elide: Text.ElideRight
         animate: true
@@ -47,7 +50,7 @@ ColumnLayout {
     StyledText {
         Layout.fillWidth: true
         text: Players.active?.trackArtist || Tr.tr("Unknown artist")
-        color: Colours.palette.m3onSurfaceVariant
+        color: Qt.darker(root.accentColour, 1.2)
         font: Tokens.font.title.builders.medium.family("Sketch Book").build()
         elide: Text.ElideRight
         animate: true
@@ -56,7 +59,7 @@ ColumnLayout {
     StyledText {
         Layout.fillWidth: true
         text: Players.active?.trackAlbum || Tr.tr("Unknown album")
-        color: Colours.palette.m3secondary
+        color: Qt.darker(root.accentColour, 1.35)
         font: Tokens.font.title.builders.medium.family("Sketch Book").build()
         elide: Text.ElideRight
         animate: true

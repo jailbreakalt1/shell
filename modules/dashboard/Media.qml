@@ -142,6 +142,7 @@ Item {
 
                     Details {
                         Layout.fillWidth: true
+                        accentColour: coverVisualiser.mediaColour
                     }
 
                     LyricsAndSelector {
