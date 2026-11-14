@@ -272,7 +272,7 @@ Item {
 
             text: modelData || ". . ."
             color: ListView.isCurrentItem ? root.accentColour : mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.85) : Qt.rgba(1, 1, 1, 0.45)
-            font: Tokens.font.body.medium
+            font: Tokens.font.body.builders.medium.family("Ananda Black Personal Use").build()
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
             layer.enabled: effectScale > 0
