@@ -15,6 +15,8 @@ ColumnLayout {
 
     readonly property color onAccentColour: Colours.on(accentColour)
     readonly property color accentContainer: Qt.alpha(accentColour, 0.16)
+    readonly property color accentDisabledContainer: Qt.alpha(accentColour, 0.08)
+    readonly property color accentDisabledOn: Qt.alpha(accentColour, 0.45)
 
     readonly property bool hasUnknownLength: (Players.active?.length ?? 0) > 2147483647
 
@@ -137,6 +139,8 @@ ColumnLayout {
             inactiveColour: root.accentContainer
             activeOnColour: root.onAccentColour
             inactiveOnColour: root.accentColour
+            disabledColour: root.accentDisabledContainer
+            disabledOnColour: root.accentDisabledOn
             icon: "shuffle"
             isRound: true
             shapeMorph: true
@@ -155,6 +159,8 @@ ColumnLayout {
             inactiveColour: root.accentContainer
             activeOnColour: root.onAccentColour
             inactiveOnColour: root.accentColour
+            disabledColour: root.accentDisabledContainer
+            disabledOnColour: root.accentDisabledOn
             icon: "skip_previous"
             isRound: true
             shapeMorph: true
@@ -170,6 +176,8 @@ ColumnLayout {
             inactiveColour: root.accentColour
             activeOnColour: root.onAccentColour
             inactiveOnColour: root.onAccentColour
+            disabledColour: root.accentDisabledContainer
+            disabledOnColour: root.accentDisabledOn
             icon: Players.active?.isPlaying ? "pause" : "play_arrow"
             isRound: true
             shapeMorph: true
@@ -188,6 +196,8 @@ ColumnLayout {
             inactiveColour: root.accentContainer
             activeOnColour: root.onAccentColour
             inactiveOnColour: root.accentColour
+            disabledColour: root.accentDisabledContainer
+            disabledOnColour: root.accentDisabledOn
             icon: "skip_next"
             isRound: true
             shapeMorph: true
@@ -202,6 +212,8 @@ ColumnLayout {
             inactiveColour: root.accentContainer
             activeOnColour: root.onAccentColour
             inactiveOnColour: root.accentColour
+            disabledColour: root.accentDisabledContainer
+            disabledOnColour: root.accentDisabledOn
             icon: Players.active?.loopState === MprisLoopState.Track ? "repeat_one" : "repeat"
             isRound: true
             shapeMorph: true
