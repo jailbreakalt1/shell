@@ -35,7 +35,8 @@ Item {
             StyledText {
                 Layout.fillWidth: true
                 text: Tr.tr("Lyrics")
-                font: Tokens.font.title.medium
+                color: root.accentColour
+                font: Tokens.font.title.builders.medium.family("Ananda Black Personal Use").build()
             }
 
             LyricsInfo {}
@@ -51,6 +52,8 @@ Item {
             Layout.alignment: Qt.AlignHCenter
 
             type: SplitButton.Tonal
+            colour: Qt.alpha(root.accentColour, 0.16)
+            textColour: root.accentColour
             disabled: !Players.list.length
             active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
             menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData

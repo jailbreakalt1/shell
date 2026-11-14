@@ -13,6 +13,9 @@ ColumnLayout {
 
     property color accentColour: Colours.mediaNeutral
 
+    readonly property color onAccentColour: Colours.on(accentColour)
+    readonly property color accentContainer: Qt.alpha(accentColour, 0.16)
+
     readonly property bool hasUnknownLength: (Players.active?.length ?? 0) > 2147483647
 
     function lengthStr(length: int): string {
@@ -82,7 +85,7 @@ ColumnLayout {
 
             Layout.preferredWidth: timeMetrics.width
             text: root.lengthStr(Players.active?.position ?? -1)
-            color: Colours.palette.m3onSurfaceVariant
+            color: Qt.darker(root.accentColour, 1.15)
             font: timeMetrics.font
             horizontalAlignment: Text.AlignHCenter
         }
@@ -97,6 +100,8 @@ ColumnLayout {
             animateWave: Players.active?.isPlaying ?? false
             waveFrequency: 5
             waveDuration: 2000
+            fgColour: root.accentColour
+            bgColour: Qt.alpha(root.accentColour, 0.28)
             interactionOnMove: false
             onInteraction: value => {
                 const active = Players.active;
@@ -115,7 +120,7 @@ ColumnLayout {
         StyledText {
             Layout.preferredWidth: timeMetrics.width
             text: root.hasUnknownLength ? "--:--" : root.lengthStr(Players.active?.length ?? -1)
-            color: Colours.palette.m3onSurfaceVariant
+            color: Qt.darker(root.accentColour, 1.15)
             font: timeMetrics.font
             horizontalAlignment: Text.AlignHCenter
         }
@@ -128,6 +133,10 @@ ColumnLayout {
 
         IconButton {
             type: IconButton.Tonal
+            activeColour: root.accentColour
+            inactiveColour: root.accentContainer
+            activeOnColour: root.onAccentColour
+            inactiveOnColour: root.accentColour
             icon: "shuffle"
             isRound: true
             shapeMorph: true
@@ -142,6 +151,10 @@ ColumnLayout {
             id: previousBtn
 
             type: IconButton.Tonal
+            activeColour: root.accentColour
+            inactiveColour: root.accentContainer
+            activeOnColour: root.onAccentColour
+            inactiveOnColour: root.accentColour
             icon: "skip_previous"
             isRound: true
             shapeMorph: true
@@ -153,6 +166,10 @@ ColumnLayout {
         IconButton {
             id: playPauseBtn
 
+            activeColour: root.accentColour
+            inactiveColour: root.accentColour
+            activeOnColour: root.onAccentColour
+            inactiveOnColour: root.onAccentColour
             icon: Players.active?.isPlaying ? "pause" : "play_arrow"
             isRound: true
             shapeMorph: true
@@ -167,6 +184,10 @@ ColumnLayout {
             id: nextBtn
 
             type: IconButton.Tonal
+            activeColour: root.accentColour
+            inactiveColour: root.accentContainer
+            activeOnColour: root.onAccentColour
+            inactiveOnColour: root.accentColour
             icon: "skip_next"
             isRound: true
             shapeMorph: true
@@ -177,6 +198,10 @@ ColumnLayout {
 
         IconButton {
             type: IconButton.Tonal
+            activeColour: root.accentColour
+            inactiveColour: root.accentContainer
+            activeOnColour: root.onAccentColour
+            inactiveOnColour: root.accentColour
             icon: Players.active?.loopState === MprisLoopState.Track ? "repeat_one" : "repeat"
             isRound: true
             shapeMorph: true
