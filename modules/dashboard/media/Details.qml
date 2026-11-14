@@ -39,7 +39,7 @@ ColumnLayout {
     StyledText {
         Layout.fillWidth: true
         text: Players.active?.trackTitle ?? ""
-        font: Tokens.font.title.large
+        font: Tokens.font.title.builders.large.family("Sketch Book").build()
         elide: Text.ElideRight
         animate: true
     }
@@ -48,7 +48,7 @@ ColumnLayout {
         Layout.fillWidth: true
         text: Players.active?.trackArtist || Tr.tr("Unknown artist")
         color: Colours.palette.m3onSurfaceVariant
-        font: Tokens.font.title.medium
+        font: Tokens.font.title.builders.medium.family("Sketch Book").build()
         elide: Text.ElideRight
         animate: true
     }
@@ -57,7 +57,7 @@ ColumnLayout {
         Layout.fillWidth: true
         text: Players.active?.trackAlbum || Tr.tr("Unknown album")
         color: Colours.palette.m3secondary
-        font: Tokens.font.title.medium
+        font: Tokens.font.title.builders.medium.family("Sketch Book").build()
         elide: Text.ElideRight
         animate: true
     }
