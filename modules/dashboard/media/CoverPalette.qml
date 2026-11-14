@@ -123,12 +123,16 @@ Item {
 
         entries.sort((a, b) => b.count - a.count);
 
-        const dominant = entries[0];
         const threshold = Math.max(2, opaque * 0.002);
 
+        // Prefer a real hue over the near-black backdrop for the focused line
+        const chromatic = entries.filter(e => e.saturation >= 0.1 && e.count >= threshold);
+        const dominant = chromatic.length ? chromatic[0] : entries[0];
+
         let secondary = null;
-        for (let i = 1; i < entries.length; i++) {
-            const entry = entries[i];
+        for (const entry of entries) {
+            if (entry === dominant)
+                continue;
             if (entry.count < threshold)
                 break;
             if (distinct(dominant, entry)) {
