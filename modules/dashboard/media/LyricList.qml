@@ -17,6 +17,9 @@ Item {
 
     property color accentColour: Colours.mediaNeutral
 
+    // Focused lyric uses a second cover colour so it stands out from the accent
+    readonly property color focusColour: palette.secondaryColour.a > 0 ? palette.secondaryColour : Qt.darker(accentColour, 1.6)
+
     // Funny binding hack to make lyrics update
     readonly property var _: {
         const p = Players.active;
@@ -265,23 +268,26 @@ Item {
 
             required property string modelData
             required property int index
-            property real effectScale: ListView.isCurrentItem ? 1 : 0
+
+            readonly property bool focused: ListView.isCurrentItem
+            readonly property int distance: Math.abs(index - lyrics.currentIndex)
+            readonly property bool neighbour: distance === 1
+            property real effectScale: focused ? 1 : 0
 
             anchors.left: lyrics.contentItem.left
             anchors.right: lyrics.contentItem.right
 
             text: modelData || ". . ."
-            color: ListView.isCurrentItem ? root.accentColour : mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.85) : Qt.rgba(1, 1, 1, 0.45)
+            color: focused ? root.focusColour : neighbour ? root.accentColour : mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.85) : Qt.rgba(1, 1, 1, 0.45)
             font: Tokens.font.body.builders.medium.family("Ananda Black Personal Use").build()
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
             layer.enabled: effectScale > 0
             layer.effect: MultiEffect {
                 shadowEnabled: true
-                shadowColor: root.accentColour
+                shadowColor: root.focusColour
                 shadowOpacity: 0.5 * lyric.effectScale
                 shadowBlur: 0.6 * lyric.effectScale
-                blur: 0.4 * lyric.effectScale
             }
 
             Behavior on effectScale {
@@ -309,6 +315,10 @@ Item {
                 type: Anim.SlowEffects
             }
         }
+    }
+
+    CoverPalette {
+        id: palette
     }
 
     Behavior on lyricList {
