@@ -6,17 +6,18 @@ Item {
 
     readonly property string artUrl: Players.getArtUrl(Players.active)
 
-    // Second most dominant usable colour, falling back to the brightest usable one
+    // Most dominant usable colour, used for the focused lyric
+    property color dominantColour: "transparent"
+    // Next dominant distinct colour, used for every other lyric line
     property color secondaryColour: "transparent"
-    property color brightestColour: "transparent"
 
     visible: false
     implicitWidth: 64
     implicitHeight: 64
 
     onArtUrlChanged: {
+        dominantColour = "transparent";
         secondaryColour = "transparent";
-        brightestColour = "transparent";
         refresh();
     }
 
@@ -26,6 +27,36 @@ Item {
 
         if (artUrl.length)
             canvas.loadImage(artUrl);
+    }
+
+    function hueDistance(a: real, b: real): real {
+        const d = Math.abs(a - b);
+        return Math.min(d, 1 - d);
+    }
+
+    function distinct(a: var, b: var): bool {
+        const aGray = a.saturation < 0.1;
+        const bGray = b.saturation < 0.1;
+
+        if (aGray && bGray)
+            return Math.abs(a.lightness - b.lightness) > 0.25;
+        if (aGray !== bGray)
+            return true;
+        return hueDistance(a.hue, b.hue) > 0.083;
+    }
+
+    function focusColour(c: var): color {
+        if (c.saturation < 0.1)
+            return Qt.hsla(0, 0, Math.max(0.62, Math.min(0.78, c.lightness)), 1);
+
+        return Colours.mediaAccent(c.colour);
+    }
+
+    function secondaryColourFor(c: var): color {
+        if (c.saturation < 0.1)
+            return Qt.hsla(0, 0, Math.max(0.55, Math.min(0.7, c.lightness)), 1);
+
+        return Qt.hsla(c.hue, Math.max(0.35, Math.min(0.85, c.saturation)), Math.max(0.48, Math.min(0.66, c.lightness)), 1);
     }
 
     function analyse(canvasItem: var): void {
@@ -69,35 +100,45 @@ Item {
             const saturation = colour.hslSaturation;
             const lightness = colour.hslLightness;
 
-            // Skip near-white and near-black buckets
-            if (saturation < 0.12 || lightness < 0.1 || (lightness > 0.9 && saturation < 0.35))
+            // Skip near-white and pure black buckets
+            if (lightness > 0.9 && saturation < 0.35)
+                continue;
+            if (lightness < 0.05 && saturation < 0.1)
                 continue;
 
             entries.push({
                 colour,
                 count,
+                hue: colour.hslHue,
+                saturation,
                 lightness
             });
         }
 
         if (!entries.length) {
+            root.dominantColour = "transparent";
             root.secondaryColour = "transparent";
-            root.brightestColour = "transparent";
             return;
         }
 
         entries.sort((a, b) => b.count - a.count);
 
+        const dominant = entries[0];
         const threshold = Math.max(2, opaque * 0.002);
-        const common = entries.filter(e => e.count >= threshold);
-        const candidates = common.length ? common : entries;
 
-        const secondary = candidates.length > 1 ? candidates[1] : null;
-        const brightest = [...candidates].sort((a, b) => b.lightness - a.lightness)[0] ?? null;
+        let secondary = null;
+        for (let i = 1; i < entries.length; i++) {
+            const entry = entries[i];
+            if (entry.count < threshold)
+                break;
+            if (distinct(dominant, entry)) {
+                secondary = entry;
+                break;
+            }
+        }
 
-        const chosen = secondary ?? brightest;
-        root.secondaryColour = chosen ? Colours.mediaAccent(chosen.colour) : "transparent";
-        root.brightestColour = brightest ? Colours.mediaAccent(brightest.colour) : "transparent";
+        root.dominantColour = focusColour(dominant);
+        root.secondaryColour = secondary ? secondaryColourFor(secondary) : "transparent";
     }
 
     Canvas {

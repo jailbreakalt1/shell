@@ -17,8 +17,9 @@ Item {
 
     property color accentColour: Colours.mediaNeutral
 
-    // Focused lyric uses a second cover colour so it stands out from the accent
-    readonly property color focusColour: palette.secondaryColour.a > 0 ? palette.secondaryColour : Qt.darker(accentColour, 1.6)
+    // Two-colour scheme: dominant for the focused line, second dominant for the rest
+    readonly property color focusColour: palette.dominantColour.a > 0 ? palette.dominantColour : Qt.darker(accentColour, 1.2)
+    readonly property color outOfFocusColour: palette.secondaryColour.a > 0 ? palette.secondaryColour : Qt.darker(accentColour, 1.6)
 
     // Funny binding hack to make lyrics update
     readonly property var _: {
@@ -276,7 +277,7 @@ Item {
             anchors.right: lyrics.contentItem.right
 
             text: modelData || ". . ."
-            color: focused ? root.focusColour : mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.85) : Qt.rgba(1, 1, 1, 0.45)
+            color: focused ? root.focusColour : Qt.alpha(root.outOfFocusColour, mouse.containsMouse ? 0.95 : 0.65)
             font: Tokens.font.body.builders.medium.family("Ananda Black Personal Use").build()
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
