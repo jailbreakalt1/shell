@@ -25,8 +25,8 @@ Singleton {
     readonly property Transparency transparency: Transparency {}
     readonly property alias wallLuminance: analyser.luminance
     readonly property color deepBlack: "#000000"
-    readonly property color enabledGreen: "#b8f7c2"
-    readonly property color enabledGreenMuted: "#79c98b"
+    readonly property color enabledGreen: "#1ed760"
+    readonly property color enabledGreenMuted: "#18a64a"
     readonly property color disabledRed: "#ff6b6b"
     readonly property color mediaNeutral: "#e8e8e8"
 
